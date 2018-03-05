@@ -6,6 +6,11 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!--沉浸效果-->
+        <!--<item name="android:fitsSystemWindows">true</item>-->
+        <!--无主题-->
+        <!--<item name="windowNoTitle">true</item>-->
     </style>
 
 </resources>

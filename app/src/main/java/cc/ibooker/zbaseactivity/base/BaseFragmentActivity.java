@@ -1,6 +1,7 @@
 package cc.ibooker.zbaseactivity.base;
 
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.Window;
+import android.view.WindowManager;
 
 import cc.ibooker.zbaseactivity.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.zbaseactivity.utils.ActivityUtil;
@@ -27,12 +29,26 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements N
         // 隐藏标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        // 沉浸效果
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // 透明状态栏
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            // 透明导航栏
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+
         // 添加到Activity工具类
         ActivityUtil.getInstance().addActivity(this);
 
         // 初始化netEvent
         netEvent = this;
+
+        // 执行初始化方法
+        init();
     }
+
+    // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化
+    protected abstract void init();
 
     @Override
     protected void onDestroy() {

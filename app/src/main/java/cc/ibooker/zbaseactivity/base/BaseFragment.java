@@ -11,7 +11,7 @@ import cc.ibooker.zbaseactivity.broadcastreceiver.NetBroadcastReceiver;
  * <p>
  * Created by 邹峰立 on 2017/10/19.
  */
-public class BaseFragment extends Fragment implements NetBroadcastReceiver.NetChangeListener {
+public abstract class BaseFragment extends Fragment implements NetBroadcastReceiver.NetChangeListener {
     public static NetBroadcastReceiver.NetChangeListener netEvent;// 网络状态改变监听事件
 
     @Override
@@ -19,7 +19,13 @@ public class BaseFragment extends Fragment implements NetBroadcastReceiver.NetCh
         super.onCreate(savedInstanceState);
         // 初始化netEvent
         netEvent = this;
+
+        // 初始化方法
+        init();
     }
+
+    // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化
+    protected abstract void init();
 
     /**
      * 网络状态改变时间监听
