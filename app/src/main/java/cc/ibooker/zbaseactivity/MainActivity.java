@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import cc.ibooker.zbaseactivity.base.BaseActivity;
+import cc.ibooker.zbaseactivity.utils.ActivityUtil;
 import cc.ibooker.zbaseactivity.utils.ConstantUtil;
 
 public class MainActivity extends BaseActivity {
@@ -50,5 +52,22 @@ public class MainActivity extends BaseActivity {
     public void onNetChange(boolean netWorkState) {
         super.onNetChange(netWorkState);
         textView.setText(netWorkState ? "有网络" : "无网络");
+    }
+
+    // 设置返回按钮的监听事件
+    private long exitTime = 0;
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // 监听返回键，点击两次退出程序
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if ((System.currentTimeMillis() - exitTime) > 5000) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_LONG).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                ActivityUtil.getInstance().exitSystem();
+            }
+            return true;
+        }
+        return false;
     }
 }
