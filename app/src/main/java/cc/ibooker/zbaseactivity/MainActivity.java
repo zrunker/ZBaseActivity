@@ -28,8 +28,7 @@ public class MainActivity extends BaseActivity {
 
     // 处理请求权限结果
     @Override
-    public void doRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.doRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void doRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
         switch (requestCode) {
             case ConstantUtil.PERMISSIONS_REQUEST_READ_PHONE_STATE:// 读取手机信息权限
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {

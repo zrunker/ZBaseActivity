@@ -75,10 +75,22 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
      *
      * @param requestCode  请求码
      * @param permissions  权限组
-     * @param grantResults 结构钢
+     * @param grantResults 结果集
      */
-    public void doRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        doRequestPermissionsResult(requestCode, grantResults);
+    }
+
+    /**
+     * 处理请求权限结果事件
+     *
+     * @param requestCode  请求码
+     * @param grantResults 结果集
+     */
+    public void doRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
     }
 
     /**
