@@ -68,6 +68,6 @@ public class MainActivity extends BaseActivity {
             }
             return true;
         }
-        return false;
+        return super.onKeyDown(keyCode, event);
     }
 }
