@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 
 import cc.ibooker.zbaseactivity.base.BaseActivity;
 import cc.ibooker.zbaseactivity.base.BaseFragment;
+import cc.ibooker.zbaseactivity.base.BaseFragmentActivity;
 import cc.ibooker.zbaseactivity.utils.NetworkUtil;
 
 /**
@@ -26,6 +27,8 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
                 BaseActivity.netEvent.onNetChange(netWorkState);
             if (BaseFragment.netEvent != null)
                 BaseFragment.netEvent.onNetChange(netWorkState);
+            if (BaseFragmentActivity.netEvent != null)
+                BaseFragmentActivity.netEvent.onNetChange(netWorkState);
         }
     }
 
