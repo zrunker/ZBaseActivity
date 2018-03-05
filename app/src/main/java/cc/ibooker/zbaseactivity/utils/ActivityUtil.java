@@ -29,6 +29,12 @@ public class ActivityUtil {
         activityList.add(activity);
     }
 
+    // 移除Activity
+    public void removeActivity(Activity activity) {
+        if (activityList != null)
+            activityList.remove(activity);
+    }
+
     // 遍历所有Activity并finish
     public void exitSystem() {
         for (Activity activity : activityList) {

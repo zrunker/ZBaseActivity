@@ -54,6 +54,8 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
     protected void onDestroy() {
         // Activity销毁时，提示系统回收
         System.gc();
+        // 移除Activity
+        ActivityUtil.getInstance().removeActivity(this);
         super.onDestroy();
     }
 
