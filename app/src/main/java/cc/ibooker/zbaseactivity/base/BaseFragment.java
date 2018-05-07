@@ -24,6 +24,12 @@ public abstract class BaseFragment extends Fragment implements NetBroadcastRecei
         init();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        netEvent = null;
+    }
+
     // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化
     protected abstract void init();
 

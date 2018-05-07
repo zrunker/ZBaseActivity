@@ -65,6 +65,7 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
     @Override
     protected void onDestroy() {
         // Activity销毁时，提示系统回收
+        // System.gc();
         netEvent = null;
         // 移除Activity
         ActivityUtil.getInstance().removeActivity(this);
@@ -75,6 +76,8 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 点击手机上的返回键，返回上一层
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // 移除Activity
+            ActivityUtil.getInstance().removeActivity(this);
             this.finish();
         }
         return super.onKeyDown(keyCode, event);

@@ -1,6 +1,7 @@
 package cc.ibooker.zbaseactivity.utils;
 
 import android.app.Activity;
+import android.os.Process;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ public class ActivityUtil {
             if (activity != null)
                 activity.finish();
         }
+        // 退出进程
+        android.os.Process.killProcess(Process.myPid());
         System.exit(0);
     }
 
