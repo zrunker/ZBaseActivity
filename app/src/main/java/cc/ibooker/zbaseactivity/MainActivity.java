@@ -19,12 +19,17 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initView();
+    }
+
+    // 初始化控件
+    private void initView() {
+        textView = findViewById(R.id.text);
     }
 
     @Override
     protected void init() {
-        textView = findViewById(R.id.text);
-
         // 判断权限
         if (!hasPermission(Manifest.permission.READ_PHONE_STATE)) {
             requestPermission(ConstantUtil.PERMISSIONS_REQUEST_READ_PHONE_STATE, Manifest.permission.READ_PHONE_STATE);
@@ -51,7 +56,8 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onNetChange(boolean netWorkState) {
         super.onNetChange(netWorkState);
-        textView.setText(netWorkState ? "有网络" : "无网络");
+        if (textView != null)
+            textView.setText(netWorkState ? "有网络" : "无网络");
     }
 
     // 设置返回按钮的监听事件
