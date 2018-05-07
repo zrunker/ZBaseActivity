@@ -104,6 +104,8 @@ public class ActivityUtil {
             if (activity != null)
                 activity.finish();
         }
+        // 退出进程
+        android.os.Process.killProcess(Process.myPid());
         System.exit(0);
     }
 
@@ -137,6 +139,7 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
     // 点击手机上的返回键，返回上一层
     if (keyCode == KeyEvent.KEYCODE_BACK) {
         this.finish();
+        ActivityUtil.getInstance().removeActivity(this);
     }
     return super.onKeyDown(keyCode, event);
 }
@@ -182,7 +185,11 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
      </intent-filter>
 </receiver>
 ```
-
+同时网络状态监听，还需要权限，不要忘记加权限：
+```
+<!--网络状态权限-->
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+```
 另外，在该类中NetworkUtil是自定义的网络管理类，主要用来检测当前网络状态，代码如下：
 ```
 /**
@@ -199,7 +206,7 @@ public class NetworkUtil {
      * 检测网络是否可用
      */
     public static boolean isNetworkConnected(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = null;
         if (cm != null) {
             ni = cm.getActiveNetworkInfo();
@@ -214,7 +221,7 @@ public class NetworkUtil {
      */
     public static int getNetworkType(Context context) {
         int netType = 0;
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;
         if (connectivityManager != null) {
             networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -293,7 +300,24 @@ public void doRequestPermissionsResult(int requestCode, @NonNull int[] grantResu
 }
 ```
 
-**七、公共方法集成**
+**七、更改应用程序字体大小**
+
+很多时候，应用程序需要实现修改字体大小功能，或者防止系统字体大小影响应用字体大小。这个实现可以通过在基类的onResume方法中进行操作。
+
+```
+@Override
+protected void onResume() {
+    super.onResume();
+    Resources resources = this.getResources();
+    Configuration configuration = resources.getConfiguration();
+    configuration.fontScale = ConstantUtil.TEXTVIEWSIZE;
+    resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+}
+```
+ConstantUtil.TEXTVIEWSIZE是设值的一个静态常量，当TEXTVIEWSIZE=1的时候，会显示系统标准字体大小，这个时候即使系统修改了字体大小，也不会影响到应用程序的字体大小。如果想要字体放大，设值其值>1即可。如果想要字体缩小，设值其值<1即可。
+
+
+**八、公共方法集成**
 
 几乎每一个Activity都要执行初始化方法，所以可以在BaseActivity基类定义一个私有抽象方法init，然后在onCreate进行调用，这样当继承该基类的Activity，就必须实现init，并在当前Activity的onCreate方法中自动执行。
 
@@ -332,13 +356,23 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
         init();
     }
 
-    // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化
+    // 抽象 - 初始化方法，可以对数据进行初始化
     protected abstract void init();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Resources resources = this.getResources();
+        Configuration configuration = resources.getConfiguration();
+        configuration.fontScale = 1;
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+    }
 
     @Override
     protected void onDestroy() {
         // Activity销毁时，提示系统回收
-        System.gc();
+        // System.gc();
+        netEvent = null;
         // 移除Activity
         ActivityUtil.getInstance().removeActivity(this);
         super.onDestroy();
@@ -348,6 +382,8 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 点击手机上的返回键，返回上一层
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // 移除Activity
+            ActivityUtil.getInstance().removeActivity(this);
             this.finish();
         }
         return super.onKeyDown(keyCode, event);
@@ -414,12 +450,16 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initView();
+    }
+
+    private void initView() {
+        textView = findViewById(R.id.text);
     }
 
     @Override
     protected void init() {
-        textView = findViewById(R.id.text);
-
         // 判断权限
         if (!hasPermission(Manifest.permission.READ_PHONE_STATE)) {
             requestPermission(ConstantUtil.PERMISSIONS_REQUEST_READ_PHONE_STATE, Manifest.permission.READ_PHONE_STATE);
@@ -472,4 +512,4 @@ public class MainActivity extends BaseActivity {
 [阅读原文](http://www.ibooker.cc/article/141/detail) 
 
 ----------
-![微信公众号：书客创作](http://upload-images.jianshu.io/upload_images/3480018-524f905b9759ebc5..jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![微信公众号：书客创作](https://upload-images.jianshu.io/upload_images/3480018-71d1cde5c687b118.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
