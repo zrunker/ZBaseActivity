@@ -19,7 +19,7 @@ public class NetworkUtil {
      * 检测网络是否可用
      */
     public static boolean isNetworkConnected(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = null;
         if (cm != null) {
             ni = cm.getActiveNetworkInfo();
@@ -34,7 +34,7 @@ public class NetworkUtil {
      */
     public static int getNetworkType(Context context) {
         int netType = 0;
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;
         if (connectivityManager != null) {
             networkInfo = connectivityManager.getActiveNetworkInfo();

@@ -1,6 +1,8 @@
 package cc.ibooker.zbaseactivity.base;
 
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +16,7 @@ import android.view.WindowManager;
 
 import cc.ibooker.zbaseactivity.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.zbaseactivity.utils.ActivityUtil;
+import cc.ibooker.zbaseactivity.utils.ConstantUtil;
 
 /**
  * BaseFragmentActivity是所有FragmentActivity的基类，把一些公共的方法放到里面，如基础样式设置，权限封装，网络状态监听等
@@ -49,6 +52,15 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements N
 
     // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化
     protected abstract void init();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Resources resources = this.getResources();
+        Configuration configuration = resources.getConfiguration();
+        configuration.fontScale = ConstantUtil.TEXTVIEWSIZE;
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+    }
 
     @Override
     protected void onDestroy() {
