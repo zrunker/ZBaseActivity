@@ -1,8 +1,10 @@
 package cc.ibooker.zbaseactivity.base;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,8 +12,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Display;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import cc.ibooker.zbaseactivity.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.zbaseactivity.utils.ActivityUtil;
@@ -24,34 +34,35 @@ import cc.ibooker.zbaseactivity.utils.ConstantUtil;
  */
 public abstract class BaseActivity extends AppCompatActivity implements NetBroadcastReceiver.NetChangeListener {
     public static NetBroadcastReceiver.NetChangeListener netEvent;// 网络状态改变监听事件
+    private boolean isOpenKeyboardEvent = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 执行初始化方法
+        isOpenKeyboardEvent = initIsOpenKeyboardEvent();
+
         // 隐藏标题栏
         if (getSupportActionBar() != null)
             getSupportActionBar().hide();
 
-        // 沉浸效果
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // 透明状态栏
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            // 透明导航栏
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }
+//        // 沉浸效果
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            // 透明状态栏
+//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//            // 透明导航栏
+//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//        }
 
         // 添加到Activity工具类
         ActivityUtil.getInstance().addActivity(this);
 
         // 初始化netEvent
         netEvent = this;
-
-        // 执行初始化方法
-        init();
     }
 
     // 抽象 - 初始化方法，可以对数据进行初始化
-    protected abstract void init();
+    protected abstract boolean initIsOpenKeyboardEvent();
 
     @Override
     protected void onResume() {
@@ -132,5 +143,96 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
      */
     @Override
     public void onNetChange(boolean netWorkState) {
+    }
+
+    // 修改状态栏的颜色
+    public void setStatusBarColor(int color) {
+        try {
+            Window window = getWindow();
+            // 取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            }
+            // 需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            }
+            // 设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.setStatusBarColor(getResources().getColor(color));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 获取状态栏的高度
+    public int getStatusBarHeight() {
+        Resources resources = getResources();
+        int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0)
+            return resources.getDimensionPixelSize(resourceId);
+        return 0;
+    }
+
+    // 底部导航栏的高度
+    public int getNavigationBarHeight() {
+        Resources resources = getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0)
+            return resources.getDimensionPixelSize(resourceId);
+        return 0;
+    }
+
+    // 判断底部导航栏是否显示
+    public boolean isNavigationBarShow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            Point realSize = new Point();
+            display.getSize(size);
+            display.getRealSize(realSize);
+            return realSize.y != size.y;
+        } else {
+            boolean menu = ViewConfiguration.get(this).hasPermanentMenuKey();
+            boolean back = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+            return !menu && !back;
+        }
+    }
+
+    // 事件分发
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (isOpenKeyboardEvent) {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                View v = getCurrentFocus();
+                if (isShouldHideInput(v, ev)) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                }
+                return super.dispatchTouchEvent(ev);
+            }
+            // 必不可少，否则所有的组件都不会有TouchEvent了
+            return getWindow().superDispatchTouchEvent(ev) || onTouchEvent(ev);
+        } else {
+            return super.dispatchTouchEvent(ev);
+        }
+    }
+
+    private boolean isShouldHideInput(View v, MotionEvent event) {
+        if (v != null && (v instanceof EditText)) {
+            int[] leftTop = {0, 0};
+            // 获取输入框当前的location位置
+            v.getLocationInWindow(leftTop);
+            int left = leftTop[0];
+            int top = leftTop[1];
+            int bottom = top + v.getHeight();
+            int right = left + v.getWidth();
+            return !(event.getX() > left) || !(event.getX() < right)
+                    || !(event.getY() > top) || !(event.getY() < bottom);
+        }
+        return false;
     }
 }

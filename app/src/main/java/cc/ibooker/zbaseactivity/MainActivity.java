@@ -21,19 +21,21 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         initView();
+
+        // 判断权限
+        if (!hasPermission(Manifest.permission.READ_PHONE_STATE)) {
+            requestPermission(ConstantUtil.PERMISSIONS_REQUEST_READ_PHONE_STATE, Manifest.permission.READ_PHONE_STATE);
+        }
+    }
+
+    @Override
+    protected boolean initIsOpenKeyboardEvent() {
+        return false;
     }
 
     // 初始化控件
     private void initView() {
         textView = findViewById(R.id.text);
-    }
-
-    @Override
-    protected void init() {
-        // 判断权限
-        if (!hasPermission(Manifest.permission.READ_PHONE_STATE)) {
-            requestPermission(ConstantUtil.PERMISSIONS_REQUEST_READ_PHONE_STATE, Manifest.permission.READ_PHONE_STATE);
-        }
     }
 
     // 处理请求权限结果
